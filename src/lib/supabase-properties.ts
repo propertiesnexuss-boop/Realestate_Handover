@@ -160,6 +160,14 @@ export function transformSupabaseProperty(row: any): Property {
     ];
   }
 
+  // If price period is monthly, purpose should be Rent ("For Rent"); if total, purpose should be Buy ("For Sale")
+  const periodNorm = (row.price_period || "").trim().toLowerCase();
+  if (periodNorm === "monthly" || periodNorm === "per month" || periodNorm === "month") {
+    purposeFormatted = "Rent";
+  } else if (periodNorm === "total") {
+    purposeFormatted = "Buy";
+  }
+
   return {
     id: row.id || "unknown",
     title: row.title || "Untitled Property",
@@ -168,6 +176,7 @@ export function transformSupabaseProperty(row: any): Property {
     type: typeFormatted,
     purpose: purposeFormatted,
     price: priceNum,
+    pricePeriod: row.price_period || undefined,
     displayPrice: formatDisplayPrice(
       priceNum,
       purposeFormatted,
@@ -239,6 +248,9 @@ function resolveAvatarUrl(
 ): string | undefined {
   if (!pathOrUrl) return undefined;
   const trimmed = pathOrUrl.trim();
+  if (trimmed.includes("photo-1560250097-0b93528c311a")) {
+    return undefined;
+  }
   if (
     trimmed.startsWith("http://") ||
     trimmed.startsWith("https://") ||

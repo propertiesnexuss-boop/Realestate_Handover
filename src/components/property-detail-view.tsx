@@ -384,9 +384,21 @@ export default function PropertyDetailView({ id }: { id?: string }) {
         <article>
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md uppercase tracking-wider">
-                {property.purpose === "Rent" ? "For Rent" : "For Sale"} · {property.type}
-              </span>
+              {(() => {
+                const periodNorm = (property.pricePeriod || (property as any).price_period || "").trim().toLowerCase();
+                const isMonthly =
+                  periodNorm === "monthly" ||
+                  periodNorm === "per month" ||
+                  periodNorm === "month" ||
+                  (property.displayPrice && (property.displayPrice.includes("/ mo") || property.displayPrice.includes("/mo")));
+                const badgeLabel = isMonthly || property.purpose === "Rent" ? "For Rent" : "For Sale";
+
+                return (
+                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md uppercase tracking-wider">
+                    {badgeLabel} · {property.type}
+                  </span>
+                );
+              })()}
               {property.tag && (
                 <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md uppercase tracking-wider">
                   {property.tag}
@@ -503,18 +515,34 @@ export default function PropertyDetailView({ id }: { id?: string }) {
           <div className="bg-white border border-slate-200 p-[24px] rounded-2xl sticky top-[95px] shadow-sm">
             {/* Provider Info Header */}
             <div className="flex items-center gap-3 mb-4 pb-4 border-b border-slate-100">
-              <img
-                src={
+              {(() => {
+                const rawPic =
                   ownerProfile?.avatar_url ||
                   property?.providerAvatar ||
-                  (property as any)?.providerAvatar ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                    ownerProfile?.full_name || property?.providerName || (property as any)?.providerName || "PN"
-                  )}&background=07182d&color=fff&size=120`
-                }
-                alt={ownerProfile?.full_name || property?.providerName || (property as any)?.providerName || "Agent"}
-                className="w-12 h-12 rounded-full object-cover border border-slate-200 shrink-0"
-              />
+                  (property as any)?.providerAvatar;
+                const isUnsplashDefault =
+                  rawPic && typeof rawPic === "string" && rawPic.includes("photo-1560250097-0b93528c311a");
+                const realAvatar = !isUnsplashDefault && rawPic ? rawPic : null;
+                const displayName =
+                  ownerProfile?.full_name ||
+                  property?.providerName ||
+                  (property as any)?.providerName ||
+                  "PropertiesNexus User";
+
+                return (
+                  <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-slate-200 bg-[#07182d] flex items-center justify-center text-white text-[16px] font-bold">
+                    {realAvatar ? (
+                      <img
+                        src={realAvatar}
+                        alt={displayName}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span>{displayName.charAt(0).toUpperCase()}</span>
+                    )}
+                  </div>
+                );
+              })()}
               <div>
                 <div className="flex items-center gap-1.5">
                   <h3 className="font-bold text-[16px] text-slate-900 m-0">

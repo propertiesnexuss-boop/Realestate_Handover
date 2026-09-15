@@ -45,7 +45,20 @@ export default function PropertyCard({ property }: { property: Property }) {
 
   const providerName = (property as any).providerName || "PropertiesNexus User";
   const providerRole = (property as any).providerRole || "Property Owner";
-  const providerAvatar = (property as any).providerAvatar || "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=100&q=80";
+  const rawAvatar = (property as any).providerAvatar;
+  const isDefaultUnsplash = rawAvatar && rawAvatar.includes("photo-1560250097-0b93528c311a");
+  const providerAvatar = !isDefaultUnsplash && rawAvatar ? rawAvatar : null;
+
+  // If price period is monthly or display price indicates /mo or purpose is Rent, show For Rent.
+  // Display "FOR SALE" only if price period is "total" or purpose is Buy/Sale (and not monthly).
+  const pricePeriodLower = (property.pricePeriod || (property as any).price_period || "").trim().toLowerCase();
+  const isMonthly =
+    pricePeriodLower === "monthly" ||
+    pricePeriodLower === "per month" ||
+    pricePeriodLower === "month" ||
+    (property.displayPrice && (property.displayPrice.includes("/ mo") || property.displayPrice.includes("/mo")));
+
+  const badgeText = isMonthly || property.purpose === "Rent" ? "For Rent" : "For Sale";
 
   return (
     <article className="border border-[#e2e8f0] bg-white rounded-2xl overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-xl flex flex-col group relative">
@@ -62,11 +75,9 @@ export default function PropertyCard({ property }: { property: Property }) {
 
         {/* Top Badges */}
         <div className="absolute z-10 top-3 left-3 flex gap-1.5 flex-wrap">
-          {property.purpose && (
-            <span className="rounded-md bg-[#2563eb] text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider shadow-sm">
-              {property.purpose === "Rent" ? "For Rent" : "For Sale"}
-            </span>
-          )}
+          <span className="rounded-md bg-[#2563eb] text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider shadow-sm">
+            {badgeText}
+          </span>
           {property.tag && (
             <span className="rounded-md bg-amber-500 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider shadow-sm">
               {property.tag}
@@ -155,8 +166,12 @@ export default function PropertyCard({ property }: { property: Property }) {
           className="mt-auto pt-1 flex items-center justify-between group/provider hover:bg-slate-50 p-1.5 rounded-xl transition-colors"
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="relative w-7 h-7 rounded-full overflow-hidden shrink-0 bg-slate-200 border border-slate-300">
-              <img src={providerAvatar} alt={providerName} className="w-full h-full object-cover" />
+            <div className="relative w-7 h-7 rounded-full overflow-hidden shrink-0 bg-[#07182d] border border-slate-300 flex items-center justify-center text-[11px] font-bold text-white">
+              {providerAvatar ? (
+                <img src={providerAvatar} alt={providerName} className="w-full h-full object-cover" />
+              ) : (
+                <span>{(providerName || "U").charAt(0).toUpperCase()}</span>
+              )}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1">

@@ -21,6 +21,7 @@ export interface Property {
   providerAvatar?: string;
   providerPhone?: string;
   owner_id?: string;
+  pricePeriod?: string;
 }
 
 export const PROPERTIES: Property[] = [
