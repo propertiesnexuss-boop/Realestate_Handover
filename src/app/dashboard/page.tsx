@@ -98,6 +98,7 @@ function UserDashboardContent() {
   const [activeThread, setActiveThread] = useState(0);
   const [replyText, setReplyText] = useState("");
   const [toastMsg, setToastMsg] = useState("");
+  const [notificationCount, setNotificationCount] = useState(0);
 
   // Modals state
   const [modalType, setModalType] = useState<
@@ -206,6 +207,22 @@ function UserDashboardContent() {
           setLiveListingsCount(live);
           setDraftListingsCount(draft);
         }
+
+        // Fetch notification count for this user's role
+        const { data: profileForRole } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+
+        const userRole = profileForRole?.role || "user";
+
+        const { count } = await supabase
+          .from("admin_notifications")
+          .select("*", { count: "exact", head: true })
+          .or(`target_role.eq.all,target_role.eq.${userRole}`);
+
+        setNotificationCount(count ?? 0);
       }
 
       setProfileLoading(false);
@@ -565,10 +582,10 @@ function UserDashboardContent() {
                 </svg>
                 <div>
                   <b className="block font-serif text-[25px] font-medium my-[13px] mb-[2px] text-ink">
-                    {messages.length}
+                    {notificationCount}
                   </b>
                   <span className="text-[10px] text-[#73818c]">
-                    Open conversations
+                    Notifications received
                   </span>
                 </div>
               </article>
