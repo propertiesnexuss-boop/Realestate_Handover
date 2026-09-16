@@ -58,7 +58,8 @@ export default function PropertyCard({ property }: { property: Property }) {
     pricePeriodLower === "month" ||
     (property.displayPrice && (property.displayPrice.includes("/ mo") || property.displayPrice.includes("/mo")));
 
-  const badgeText = isMonthly || property.purpose === "Rent" ? "For Rent" : "For Sale";
+  const isForRent = isMonthly || property.purpose === "Rent";
+  const badgeText = isForRent ? "For Rent" : "For Sale";
 
   return (
     <article className="border border-[#e2e8f0] bg-white rounded-2xl overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-xl flex flex-col group relative">
@@ -75,7 +76,7 @@ export default function PropertyCard({ property }: { property: Property }) {
 
         {/* Top Badges */}
         <div className="absolute z-10 top-3 left-3 flex gap-1.5 flex-wrap">
-          <span className="rounded-md bg-[#2563eb] text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider shadow-sm">
+          <span className={`rounded-md text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider shadow-sm ${isForRent ? "bg-red-500" : "bg-[#2563eb]"}`}>
             {badgeText}
           </span>
           {property.tag && (
@@ -118,8 +119,8 @@ export default function PropertyCard({ property }: { property: Property }) {
           aria-label={`Save ${property.title}`}
           title={isSaved ? "Remove from saved" : "Save property"}
           className={`absolute z-20 right-3 top-3 border-0 rounded-full w-9 h-9 cursor-pointer flex items-center justify-center shadow-md transition-all duration-150 ${isSaved
-              ? "bg-white text-red-500 scale-105"
-              : "bg-white/90 text-slate-400 hover:text-red-400 hover:bg-white hover:scale-110"
+            ? "bg-white text-red-500 scale-105"
+            : "bg-white/90 text-slate-400 hover:text-red-400 hover:bg-white hover:scale-110"
             }`}
         >
           <svg
@@ -193,4 +194,3 @@ export default function PropertyCard({ property }: { property: Property }) {
     </article>
   );
 }
-
